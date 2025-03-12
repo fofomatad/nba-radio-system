@@ -1,0 +1,50 @@
+import streamlit as st
+import requests
+import json
+from datetime import datetime
+
+class NBARadioSystem:
+    def __init__(self):
+        self.stations = {
+            "ESPN NBA": "https://espn-radio.streamguys1.com/espn-network",
+            "NBA Radio": "https://tunein.com/radio/NBA-Radio-s195781/",
+            "CBS Sports Radio": "https://live.amperwave.net/direct/audacy-cbssportsaac-imc"
+        }
+        self.favorites = set()
+        self.history = []
+
+    def add_station(self, name, url):
+        self.stations[name] = url
+        self.add_to_history(f"Added station: {name}")
+
+    def add_to_history(self, action):
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        self.history.append(f"{timestamp} - {action}")
+
+def main():
+    st.set_page_config(page_title="NBA Radio System", page_icon="🏀")
+    st.title("NBA Radio System 🏀")
+
+    if 'radio_system' not in st.session_state:
+        st.session_state.radio_system = NBARadioSystem()
+
+    # Add new station
+    with st.expander("Add New Station"):
+        new_name = st.text_input("Station Name")
+        new_url = st.text_input("Stream URL")
+        if st.button("Add Station") and new_name and new_url:
+            st.session_state.radio_system.add_station(new_name, new_url)
+            st.success(f"Added: {new_name}")
+
+    # Display stations
+    st.header("Available Stations")
+    for name, url in st.session_state.radio_system.stations.items():
+        col1, col2 = st.columns([3, 1])
+        with col1:
+            st.write(f"📻 {name}")
+        with col2:
+            if st.button("Play", key=name):
+                st.audio(url)
+
+if __name__ == "__main__":
+    main()
